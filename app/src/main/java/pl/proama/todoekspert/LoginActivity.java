@@ -1,5 +1,6 @@
 package pl.proama.todoekspert;
 
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -34,6 +35,14 @@ public class LoginActivity extends AppCompatActivity {
         ButterKnife.inject(this);
 
         Timber.plant(new Timber.DebugTree());
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(asyncTask != null) {
+            asyncTask.cancel(false);
+        }
     }
 
     @OnClick(R.id.loginButton)
@@ -82,6 +91,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 for (int i = 0; i < 100; i++) {
 
+                    if(isCancelled())
+                        return false;
                     try {
                         Thread.sleep(20);
                     } catch (InterruptedException e) {
@@ -117,7 +128,13 @@ public class LoginActivity extends AppCompatActivity {
                 loginButton.setEnabled(true);
                 asyncTask = null;
                 if(result) {
-                    
+
+                    Intent intent = new Intent(LoginActivity.this, TodoListActivity.class);
+                    startActivity(intent);
+
+                    finish();
+
+
                 }
             }
         };
