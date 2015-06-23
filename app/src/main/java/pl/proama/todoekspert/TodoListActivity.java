@@ -16,18 +16,25 @@ import android.widget.Toast;
 
 import java.util.List;
 
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
+import timber.log.Timber;
+
 
 public class TodoListActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE = 123;
     private AsyncTask<Void, Void, List<Todo>> asyncTask;
     private App.LoginManager loginManager;
+    private TodoApi todoApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        loginManager = ((App) getApplication()).getLoginManager();
+        App application = (App) getApplication();
+        loginManager = application.getLoginManager();
+        todoApi = application.getTodoApi();
 
         if(loginManager.needsLogin()) {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
@@ -38,6 +45,8 @@ public class TodoListActivity extends AppCompatActivity {
 
 
         setContentView(R.layout.activity_todo_list);
+
+
     }
 
     @Override
@@ -80,10 +89,23 @@ public class TodoListActivity extends AppCompatActivity {
             asyncTask = new AsyncTask<Void, Void, List<Todo>>() {
                 @Override
                 protected List<Todo> doInBackground(Void... voids) {
+
+
                     try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
+
+                        return todoApi.getTodos(loginManager.getToken()).results;
+                    } catch (final RetrofitError error) {
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                ApiError apiError = (ApiError) error.getBodyAs(ApiError.class);
+
+                                Toast.makeText(getApplicationContext(), apiError.error, Toast.LENGTH_SHORT).show();
+                            }
+                        });
+
                     }
                     return null;
                 }
@@ -92,6 +114,10 @@ public class TodoListActivity extends AppCompatActivity {
                 protected void onPostExecute(List<Todo> todos) {
                     super.onPostExecute(todos);
                     Toast.makeText(getApplicationContext(), "Refeshed", Toast.LENGTH_SHORT).show();
+                    for (Todo todo : todos) {
+                        Timber.d(todo.toString());
+                    }
+
                 }
             };
             asyncTask.execute();

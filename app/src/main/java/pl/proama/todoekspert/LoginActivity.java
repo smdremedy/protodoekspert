@@ -36,15 +36,21 @@ public class LoginActivity extends AppCompatActivity {
     Button loginButton;
     @InjectView(R.id.progressBar)
     ProgressBar progressBar;
+
     private AsyncTask<String, Integer, UserResponse> asyncTask;
+    private App.LoginManager loginManager;
+    private TodoApi todoApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.inject(this);
+        App application = (App) getApplication();
+        loginManager = application.getLoginManager();
+        todoApi = application.getTodoApi();
 
-        Timber.plant(new Timber.DebugTree());
+
     }
 
     @Override
@@ -98,12 +104,6 @@ public class LoginActivity extends AppCompatActivity {
                 String usernameArg = strings[0];
                 String passwordArg = strings[1];
 
-                RestAdapter.Builder builder = new RestAdapter.Builder();
-                builder.setEndpoint("https://api.parse.com/1");
-                builder.setLogLevel(RestAdapter.LogLevel.FULL);
-                RestAdapter restAdapter = builder.build();
-
-                TodoApi todoApi = restAdapter.create(TodoApi.class);
 
 
                 try {
@@ -152,11 +152,7 @@ public class LoginActivity extends AppCompatActivity {
                 asyncTask = null;
                 if(result != null) {
 
-                    App.LoginManager loginManager = ((App) getApplication()).getLoginManager();
-
                     loginManager.save(result.objectId, result.sessionToken);
-
-
 
 
                     Intent intent = new Intent(LoginActivity.this, TodoListActivity.class);

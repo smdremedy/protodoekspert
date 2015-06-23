@@ -7,8 +7,17 @@ import android.os.Build;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 
+import retrofit.RestAdapter;
+import timber.log.Timber;
+
 public class App extends Application {
 
+
+    private TodoApi todoApi;
+
+    public TodoApi getTodoApi() {
+        return todoApi;
+    }
 
     static class LoginManager {
 
@@ -66,6 +75,10 @@ public class App extends Application {
             token = sessionToken;
             userId = objectId;
         }
+
+        public String getToken() {
+            return token;
+        }
     }
 
     public LoginManager getLoginManager() {
@@ -77,9 +90,22 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Timber.plant(new Timber.DebugTree());
 
         loginManager = new LoginManager(this);
 
+        createApi();
+
+
+    }
+
+    private void createApi() {
+        RestAdapter.Builder builder = new RestAdapter.Builder();
+        builder.setEndpoint("https://api.parse.com/1");
+        builder.setLogLevel(RestAdapter.LogLevel.FULL);
+        RestAdapter restAdapter = builder.build();
+
+        todoApi = restAdapter.create(TodoApi.class);
 
     }
 
