@@ -1,5 +1,6 @@
 package pl.proama.todoekspert;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -52,13 +53,31 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    private void login(String username, String password) {
+    private void login(final String username, String password) {
 
-        try {
-            Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+
+        AsyncTask<String, Integer, Boolean> asyncTask = new AsyncTask<String, Integer, Boolean>() {
+            @Override
+            protected Boolean doInBackground(String... strings) {
+                String usernameArg = strings[0];
+                String passwordArg = strings[1];
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                return "test".equals(usernameArg) && "test".equals(passwordArg);
+            }
+
+            @Override
+            protected void onPostExecute(Boolean result) {
+                super.onPostExecute(result);
+                usernameEditText.setText("" + result);
+            }
+        };
+        asyncTask.execute(username, password);
+
 
     }
 
