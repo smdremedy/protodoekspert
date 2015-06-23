@@ -1,8 +1,11 @@
 package pl.proama.todoekspert;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
@@ -24,6 +27,8 @@ import timber.log.Timber;
 
 public class LoginActivity extends AppCompatActivity {
 
+    public static final String TOKEN_PREFS_KEY = "token";
+    public static final String USER_ID_PREFS_KEY = "userId";
     @InjectView(R.id.usernameEditText)
     EditText usernameEditText;
     @InjectView(R.id.passwordEditText)
@@ -32,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
     Button loginButton;
     @InjectView(R.id.progressBar)
     ProgressBar progressBar;
-    private AsyncTask<String, Integer, Boolean> asyncTask;
+    private AsyncTask<String, Integer, UserResponse> asyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,9 +93,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void prepareTask() {
-        asyncTask = new AsyncTask<String, Integer, Boolean>() {
+        asyncTask = new AsyncTask<String, Integer, UserResponse>() {
             @Override
-            protected Boolean doInBackground(String... strings) {
+            protected UserResponse doInBackground(String... strings) {
                 String usernameArg = strings[0];
                 String passwordArg = strings[1];
 
@@ -104,8 +109,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 try {
 
-                    UserResponse userResponse = todoApi.getLogin(usernameArg, passwordArg);
-                    return !TextUtils.isEmpty(userResponse.sessionToken);
+                    return todoApi.getLogin(usernameArg, passwordArg);
                 } catch (final RetrofitError error) {
 
                     runOnUiThread(new Runnable() {
@@ -120,7 +124,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 }
 
-                return false;
+                return null;
 
 
             }
@@ -143,11 +147,33 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
-            protected void onPostExecute(Boolean result) {
+            protected void onPostExecute(UserResponse result) {
                 super.onPostExecute(result);
                 loginButton.setEnabled(true);
                 asyncTask = null;
-                if(result) {
+                if(result != null) {
+
+
+                    SharedPreferences sharedPreferences =
+                            PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+
+                    final SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.putString(TOKEN_PREFS_KEY, result.sessionToken);
+                    editor.putString(USER_ID_PREFS_KEY, result.objectId);
+
+                    if(BuildConfig.VERSION_CODE >= Build.VERSION_CODES.GINGERBREAD) {
+                        editor.apply();
+                    } else {
+                        new Thread() {
+                            @Override
+                            public void run() {
+                                super.run();
+                                editor.commit();
+                            }
+                        }.start();
+                    }
+
+
 
                     Intent intent = new Intent(LoginActivity.this, TodoListActivity.class);
                     startActivity(intent);

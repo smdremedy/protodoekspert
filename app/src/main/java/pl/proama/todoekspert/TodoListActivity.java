@@ -2,11 +2,14 @@ package pl.proama.todoekspert;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
@@ -22,6 +25,19 @@ public class TodoListActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        String token = preferences.getString(LoginActivity.TOKEN_PREFS_KEY, "");
+        String userId = preferences.getString(LoginActivity.USER_ID_PREFS_KEY, "");
+
+        if(TextUtils.isEmpty(token) || TextUtils.isEmpty(userId)) {
+            Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
+            startActivity(intent);
+            finish();
+            return;
+        }
+
+
         setContentView(R.layout.activity_todo_list);
     }
 
@@ -91,6 +107,11 @@ public class TodoListActivity extends AppCompatActivity {
         builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
+                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                SharedPreferences.Editor edit = preferences.edit();
+                edit.clear();
+                edit.apply();
+
                 finish();
             }
         });
