@@ -27,8 +27,7 @@ import timber.log.Timber;
 
 public class LoginActivity extends AppCompatActivity {
 
-    public static final String TOKEN_PREFS_KEY = "token";
-    public static final String USER_ID_PREFS_KEY = "userId";
+
     @InjectView(R.id.usernameEditText)
     EditText usernameEditText;
     @InjectView(R.id.passwordEditText)
@@ -153,25 +152,10 @@ public class LoginActivity extends AppCompatActivity {
                 asyncTask = null;
                 if(result != null) {
 
+                    App.LoginManager loginManager = ((App) getApplication()).getLoginManager();
 
-                    SharedPreferences sharedPreferences =
-                            PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                    loginManager.save(result.objectId, result.sessionToken);
 
-                    final SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.putString(TOKEN_PREFS_KEY, result.sessionToken);
-                    editor.putString(USER_ID_PREFS_KEY, result.objectId);
-
-                    if(BuildConfig.VERSION_CODE >= Build.VERSION_CODES.GINGERBREAD) {
-                        editor.apply();
-                    } else {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                super.run();
-                                editor.commit();
-                            }
-                        }.start();
-                    }
 
 
 
@@ -185,6 +169,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         };
     }
+
+
 
 
 }

@@ -21,16 +21,15 @@ public class TodoListActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE = 123;
     private AsyncTask<Void, Void, List<Todo>> asyncTask;
+    private App.LoginManager loginManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        String token = preferences.getString(LoginActivity.TOKEN_PREFS_KEY, "");
-        String userId = preferences.getString(LoginActivity.USER_ID_PREFS_KEY, "");
+        loginManager = ((App) getApplication()).getLoginManager();
 
-        if(TextUtils.isEmpty(token) || TextUtils.isEmpty(userId)) {
+        if(loginManager.needsLogin()) {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(intent);
             finish();
@@ -107,11 +106,7 @@ public class TodoListActivity extends AppCompatActivity {
         builder.setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                SharedPreferences.Editor edit = preferences.edit();
-                edit.clear();
-                edit.apply();
-
+                loginManager.logout();
                 finish();
             }
         });
