@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TodoEkspert</string>
+    <string name="action_logout">Wylogouj</string>
+    <string name="action_new">Dodaj</string>
+    <string name="action_settings">Ustawienia</string>
+    <string name="are_you_sure">Czy jesteś pewien?</string>
+    <string name="empty_field">Pole nie może być puste!</string>
+    <string name="enter_login">Podaj nazwę użytkownika</string>
+    <string name="enter_password">Podaj hasło</string>
+    <string name="hello_world">Ahoj przygodo!</string>
+    <string name="login">Zaloguj</string>
+    <string name="want_to_quit">Czy chcesz się wylogować?</string>
+</resources>

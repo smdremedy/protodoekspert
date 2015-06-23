@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">TodoEkspert</string>
+    <string name="app_name" translatable="false">TodoEkspert</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -8,4 +8,8 @@
     <string name="login">Login</string>
     <string name="empty_field">This field cannot be empty!</string>
     <string name="title_activity_todo_list">TodoListActivity</string>
+    <string name="action_new">Add</string>
+    <string name="action_logout">Logout</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="want_to_quit">Do you want to log out?</string>
 </resources>
