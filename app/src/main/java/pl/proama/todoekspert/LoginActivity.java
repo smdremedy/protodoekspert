@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Patterns;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -19,6 +18,9 @@ public class LoginActivity extends AppCompatActivity {
     EditText usernameEditText;
     @InjectView(R.id.passwordEditText)
     EditText passwordEditText;
+    @InjectView(R.id.loginButton)
+    Button loginButton;
+    private AsyncTask<String, Integer, Boolean> asyncTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,21 +36,20 @@ public class LoginActivity extends AppCompatActivity {
         String password = passwordEditText.getText().toString();
         boolean hasErrors = false;
 
-        if(TextUtils.isEmpty(username)) {
+        if (TextUtils.isEmpty(username)) {
 
             usernameEditText.setError(getString(R.string.empty_field));
             hasErrors = true;
 
         }
-        if(TextUtils.isEmpty(password)) {
+        if (TextUtils.isEmpty(password)) {
             passwordEditText.setError(getString(R.string.empty_field));
             hasErrors = true;
         }
 
-        if(!hasErrors) {
+        if (!hasErrors) {
             login(username, password);
         }
-
 
 
     }
@@ -56,14 +57,23 @@ public class LoginActivity extends AppCompatActivity {
     private void login(final String username, String password) {
 
 
-        AsyncTask<String, Integer, Boolean> asyncTask = new AsyncTask<String, Integer, Boolean>() {
+        if(asyncTask == null) {
+            prepareTask();
+            asyncTask.execute(username, password);
+        }
+
+
+    }
+
+    private void prepareTask() {
+        asyncTask = new AsyncTask<String, Integer, Boolean>() {
             @Override
             protected Boolean doInBackground(String... strings) {
                 String usernameArg = strings[0];
                 String passwordArg = strings[1];
 
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -71,14 +81,18 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             @Override
+            protected void onPreExecute() {
+                super.onPreExecute();
+                loginButton.setEnabled(false);
+            }
+
+            @Override
             protected void onPostExecute(Boolean result) {
                 super.onPostExecute(result);
-                usernameEditText.setText("" + result);
+                loginButton.setEnabled(true);
+                asyncTask = null;
             }
         };
-        asyncTask.execute(username, password);
-
-
     }
 
 
