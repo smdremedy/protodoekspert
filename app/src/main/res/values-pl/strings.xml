@@ -11,4 +11,5 @@
     <string name="hello_world">Ahoj przygodo!</string>
     <string name="login">Zaloguj</string>
     <string name="want_to_quit">Czy chcesz się wylogować?</string>
+    <string name="add_todo">Dodaj zadanie</string>
 </resources>

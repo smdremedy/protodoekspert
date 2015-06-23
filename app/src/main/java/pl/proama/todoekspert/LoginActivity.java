@@ -9,10 +9,16 @@ import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
+import retrofit.RestAdapter;
+import retrofit.RetrofitError;
 import timber.log.Timber;
 
 
@@ -88,21 +94,35 @@ public class LoginActivity extends AppCompatActivity {
                 String usernameArg = strings[0];
                 String passwordArg = strings[1];
 
+                RestAdapter.Builder builder = new RestAdapter.Builder();
+                builder.setEndpoint("https://api.parse.com/1");
+                builder.setLogLevel(RestAdapter.LogLevel.FULL);
+                RestAdapter restAdapter = builder.build();
 
-                for (int i = 0; i < 100; i++) {
+                TodoApi todoApi = restAdapter.create(TodoApi.class);
 
-                    if(isCancelled())
-                        return false;
-                    try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    publishProgress(i);
+
+                try {
+
+                    UserResponse userResponse = todoApi.getLogin(usernameArg, passwordArg);
+                    return !TextUtils.isEmpty(userResponse.sessionToken);
+                } catch (final RetrofitError error) {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            ApiError apiError = (ApiError) error.getBodyAs(ApiError.class);
+
+                            Toast.makeText(getApplicationContext(), apiError.error, Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
                 }
 
-                return "test".equals(usernameArg) && "test".equals(passwordArg);
+                return false;
+
+
             }
 
             @Override

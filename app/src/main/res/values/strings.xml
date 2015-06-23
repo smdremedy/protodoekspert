@@ -12,4 +12,9 @@
     <string name="action_logout">Logout</string>
     <string name="are_you_sure">Are you sure?</string>
     <string name="want_to_quit">Do you want to log out?</string>
+    <string name="title_activity_add_todo">AddTodoActivity</string>
+    <string name="add_todo">Add Todo</string>
+    <string name="what_to_be_done">What needs to be done?</string>
+    <string name="done">Done</string>
+    <string name="action_refresh">Refresh</string>
 </resources>

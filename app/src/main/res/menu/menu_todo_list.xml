@@ -11,11 +11,18 @@
         android:orderInCategory="100"/>
 
     <item
+        android:id="@+id/action_refresh"
+        android:title="@string/action_refresh"
+        android:icon="@drawable/ic_action_refresh"
+        app:showAsAction="always|withText"
+        android:orderInCategory="150"/>
+
+    <item
         android:id="@+id/action_logout"
         android:title="@string/action_logout"
         app:showAsAction="never"
         android:orderInCategory="200"/>
 
-    
+
 
 </menu>
