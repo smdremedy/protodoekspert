@@ -2,6 +2,7 @@ package pl.proama.todoekspert;
 
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,6 +26,7 @@ import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import pl.proama.todoekspert.db.TodoDao;
 import retrofit.RetrofitError;
 import timber.log.Timber;
 
@@ -37,10 +40,15 @@ public class TodoListActivity extends AppCompatActivity {
     LoginManager loginManager;
     @Inject
     TodoApi todoApi;
+    @Inject
+    TodoDao todoDao;
 
     @InjectView(R.id.todosListView)
     ListView todosListView;
     private TodoAdapter adapter;
+    private SimpleCursorAdapter cursorAdapter;
+    private String[] from = new String[]{TodoDao.C_CONTENT, TodoDao.C_DONE};
+    private int[] to = new int[]{R.id.listDoneCheckBox, R.id.listDoneCheckBox};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +70,23 @@ public class TodoListActivity extends AppCompatActivity {
 
         adapter = new TodoAdapter(LayoutInflater.from(getApplicationContext()));
 
-        todosListView.setAdapter(adapter);
+        cursorAdapter = new SimpleCursorAdapter(getApplicationContext(), R.layout.list_item, null, from, to, 0);
+        cursorAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+            @Override
+            public boolean setViewValue(View view, Cursor cursor, int index) {
+
+                if(index == cursor.getColumnIndex(TodoDao.C_DONE)) {
+
+                    CheckBox checkBox = (CheckBox) view;
+                    checkBox.setChecked(cursor.getInt(index) > 0);
+                    return true;
+                }
+
+                return false;
+            }
+        });
+
+        todosListView.setAdapter(cursorAdapter);
 
     }
 
@@ -232,7 +256,13 @@ public class TodoListActivity extends AppCompatActivity {
 
                                 ApiError apiError = (ApiError) error.getBodyAs(ApiError.class);
 
-                                Toast.makeText(getApplicationContext(), apiError.error, Toast.LENGTH_SHORT).show();
+                                if(apiError == null) {
+
+                                    Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
+                                } else {
+
+                                    Toast.makeText(getApplicationContext(), apiError.error, Toast.LENGTH_SHORT).show();
+                                }
                             }
                         });
 
@@ -244,10 +274,15 @@ public class TodoListActivity extends AppCompatActivity {
                 protected void onPostExecute(List<Todo> todos) {
                     super.onPostExecute(todos);
                     Toast.makeText(getApplicationContext(), "Refeshed", Toast.LENGTH_SHORT).show();
-                    adapter.addAll(todos);
+
+
                     for (Todo todo : todos) {
                         Timber.d(todo.toString());
+                        todoDao.insertOrUpdate(todo);
                     }
+
+                    Cursor cursor = todoDao.query(loginManager.getUserId(), true);
+                    cursorAdapter.swapCursor(cursor);
 
                 }
             };
