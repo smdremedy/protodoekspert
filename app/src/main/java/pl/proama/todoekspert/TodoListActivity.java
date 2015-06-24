@@ -1,19 +1,33 @@
 package pl.proama.todoekspert;
 
+import android.app.AlarmManager;
+import android.app.ListActivity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
 
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import retrofit.RetrofitError;
 import timber.log.Timber;
 
@@ -27,6 +41,10 @@ public class TodoListActivity extends AppCompatActivity {
     LoginManager loginManager;
     @Inject
     TodoApi todoApi;
+
+    @InjectView(R.id.todosListView)
+    ListView todosListView;
+    private TodoAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +62,80 @@ public class TodoListActivity extends AppCompatActivity {
 
 
         setContentView(R.layout.activity_todo_list);
+        ButterKnife.inject(this);
 
+        adapter = new TodoAdapter(LayoutInflater.from(getApplicationContext()));
+
+        todosListView.setAdapter(adapter);
+
+    }
+
+    static class TodoAdapter extends BaseAdapter {
+
+        private final LayoutInflater layoutInflater;
+        private ArrayList<Todo> todos = new ArrayList<>();
+
+        public TodoAdapter(LayoutInflater layoutInflater) {
+
+            this.layoutInflater = layoutInflater;
+        }
+
+        @Override
+        public int getCount() {
+            return todos.size();
+        }
+
+        @Override
+        public Todo getItem(int i) {
+            return todos.get(i);
+        }
+
+        @Override
+        public long getItemId(int i) {
+            return i;
+        }
+
+        @Override
+        public View getView(int i, View convertView, ViewGroup viewGroup) {
+            Timber.d("Item :" + i + " view:" + convertView);
+            View inflatedView = convertView;
+            //if(inflatedView == null) {
+                inflatedView = layoutInflater.inflate(R.layout.list_item, viewGroup, false);
+            //}
+
+            ViewHolder viewHolder = (ViewHolder) inflatedView.getTag();
+            if(viewHolder == null) {
+                viewHolder = new ViewHolder();
+
+                viewHolder.checkBox = (CheckBox) inflatedView.findViewById(R.id.listDoneCheckBox);
+                viewHolder.textView = (TextView) inflatedView.findViewById(R.id.listContentTextView);
+                inflatedView.setTag(viewHolder);
+            }
+
+            Todo todo = getItem(i);
+
+            viewHolder.checkBox.setChecked(todo.isDone());
+            viewHolder.textView.setText(todo.getContent());
+
+
+            return inflatedView;
+        }
+
+        public void addAll(List<Todo> todos) {
+            this.todos.clear();
+            this.todos.addAll(todos);
+
+            if(this.todos.isEmpty()) {
+                notifyDataSetInvalidated();
+            } else {
+                notifyDataSetChanged();
+            }
+        }
+    }
+
+    static class ViewHolder {
+        CheckBox checkBox;
+        TextView textView;
 
     }
 
@@ -113,6 +204,7 @@ public class TodoListActivity extends AppCompatActivity {
                 protected void onPostExecute(List<Todo> todos) {
                     super.onPostExecute(todos);
                     Toast.makeText(getApplicationContext(), "Refeshed", Toast.LENGTH_SHORT).show();
+                    adapter.addAll(todos);
                     for (Todo todo : todos) {
                         Timber.d(todo.toString());
                     }
