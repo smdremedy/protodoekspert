@@ -1,8 +1,5 @@
 package pl.proama.todoekspert;
 
-import android.app.AlarmManager;
-import android.app.ListActivity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
@@ -14,7 +11,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.ListView;
@@ -96,12 +92,56 @@ public class TodoListActivity extends AppCompatActivity {
         }
 
         @Override
+        public int getViewTypeCount() {
+            return 2;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return position % 2;
+        }
+
+
+
+        @Override
         public View getView(int i, View convertView, ViewGroup viewGroup) {
             Timber.d("Item :" + i + " view:" + convertView);
+            if(getItemViewType(i) == 0) {
+                return getView0(i, convertView, viewGroup);
+            } else {
+                return getView1(i, convertView, viewGroup);
+            }
+        }
+
+        private View getView1(int i, View convertView, ViewGroup viewGroup) {
             View inflatedView = convertView;
-            //if(inflatedView == null) {
+            if(inflatedView == null) {
                 inflatedView = layoutInflater.inflate(R.layout.list_item, viewGroup, false);
-            //}
+            }
+
+            ViewHolder viewHolder = (ViewHolder) inflatedView.getTag();
+            if(viewHolder == null) {
+                viewHolder = new ViewHolder();
+
+                viewHolder.checkBox = (CheckBox) inflatedView.findViewById(R.id.listDoneCheckBox);
+                viewHolder.textView = (TextView) inflatedView.findViewById(R.id.listContentTextView);
+                inflatedView.setTag(viewHolder);
+            }
+
+            Todo todo = getItem(i);
+
+            viewHolder.checkBox.setChecked(todo.isDone());
+            viewHolder.textView.setText(todo.getContent());
+
+
+            return inflatedView;
+        }
+
+        private View getView0(int i, View convertView, ViewGroup viewGroup) {
+            View inflatedView = convertView;
+            if(inflatedView == null) {
+                inflatedView = layoutInflater.inflate(R.layout.list_item_1, viewGroup, false);
+            }
 
             ViewHolder viewHolder = (ViewHolder) inflatedView.getTag();
             if(viewHolder == null) {
