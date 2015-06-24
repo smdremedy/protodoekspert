@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.ContentObserver;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
@@ -30,6 +32,7 @@ import javax.inject.Inject;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import pl.proama.todoekspert.db.TodoDao;
+import pl.proama.todoekspert.db.TodoProvider;
 import retrofit.RetrofitError;
 import timber.log.Timber;
 
@@ -87,7 +90,10 @@ public class TodoListActivity extends AppCompatActivity {
 
         adapter = new TodoAdapter(LayoutInflater.from(getApplicationContext()));
 
-        cursorAdapter = new SimpleCursorAdapter(getApplicationContext(), R.layout.list_item, null, from, to, 0);
+        
+
+
+        cursorAdapter = new SimpleCursorAdapter(getApplicationContext(), R.layout.list_item, query, from, to, 0);
         cursorAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Cursor cursor, int index) {

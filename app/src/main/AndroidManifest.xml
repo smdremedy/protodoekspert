@@ -37,6 +37,11 @@
 
         <service android:name=".RefreshIntentService"/>
 
+        <provider
+            android:authorities="pl.proama.todoekspert.Provider"
+            android:name=".db.TodoProvider"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

@@ -110,7 +110,7 @@ public class RefreshIntentService extends IntentService {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext());
 
-        
+
         builder.setContentTitle(getText(R.string.notification_title));
         builder.setContentText(notificationSummary);
 
