@@ -5,6 +5,7 @@ import javax.inject.Singleton;
 import dagger.Component;
 import pl.proama.todoekspert.AddTodoActivity;
 import pl.proama.todoekspert.LoginActivity;
+import pl.proama.todoekspert.RefreshIntentService;
 import pl.proama.todoekspert.TodoApi;
 import pl.proama.todoekspert.TodoListActivity;
 
@@ -20,5 +21,8 @@ public interface TodoComponent {
 
     void inject(AddTodoActivity addTodoActivity);
 
+    void inject(RefreshIntentService refreshIntentService);
+
     TodoApi getTodoApi();
+
 }

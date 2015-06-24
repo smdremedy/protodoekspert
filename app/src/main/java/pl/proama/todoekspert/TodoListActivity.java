@@ -1,7 +1,10 @@
 package pl.proama.todoekspert;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.database.Cursor;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -50,6 +53,20 @@ public class TodoListActivity extends AppCompatActivity {
     private String[] from = new String[]{TodoDao.C_CONTENT, TodoDao.C_DONE};
     private int[] to = new int[]{R.id.listDoneCheckBox, R.id.listDoneCheckBox};
 
+
+    private BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+            refresh();
+
+        }
+    };
+
+    private void refresh() {
+        cursorAdapter.swapCursor(todoDao.query(loginManager.getUserId(), true));
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,6 +105,19 @@ public class TodoListActivity extends AppCompatActivity {
 
         todosListView.setAdapter(cursorAdapter);
 
+    }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(receiver);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(receiver, new IntentFilter(RefreshIntentService.ACTION));
     }
 
     static class TodoAdapter extends BaseAdapter {
@@ -239,55 +269,8 @@ public class TodoListActivity extends AppCompatActivity {
     private void performRefresh() {
 
 
-        if(asyncTask == null) {
-            asyncTask = new AsyncTask<Void, Void, List<Todo>>() {
-                @Override
-                protected List<Todo> doInBackground(Void... voids) {
-
-
-                    try {
-
-                        return todoApi.getTodos(loginManager.getToken()).results;
-                    } catch (final RetrofitError error) {
-
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                ApiError apiError = (ApiError) error.getBodyAs(ApiError.class);
-
-                                if(apiError == null) {
-
-                                    Toast.makeText(getApplicationContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-                                } else {
-
-                                    Toast.makeText(getApplicationContext(), apiError.error, Toast.LENGTH_SHORT).show();
-                                }
-                            }
-                        });
-
-                    }
-                    return null;
-                }
-
-                @Override
-                protected void onPostExecute(List<Todo> todos) {
-                    super.onPostExecute(todos);
-                    Toast.makeText(getApplicationContext(), "Refeshed", Toast.LENGTH_SHORT).show();
-
-
-                    for (Todo todo : todos) {
-                        Timber.d(todo.toString());
-                        todoDao.insertOrUpdate(todo);
-                    }
-
-                    Cursor cursor = todoDao.query(loginManager.getUserId(), true);
-                    cursorAdapter.swapCursor(cursor);
-
-                }
-            };
-            asyncTask.execute();
-        }
+        Intent intent = new Intent(getApplicationContext(), RefreshIntentService.class);
+        startService(intent);
     }
 
 
