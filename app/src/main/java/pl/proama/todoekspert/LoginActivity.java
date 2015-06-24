@@ -1,26 +1,20 @@
 package pl.proama.todoekspert;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import javax.inject.Inject;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import timber.log.Timber;
 
@@ -38,17 +32,17 @@ public class LoginActivity extends AppCompatActivity {
     ProgressBar progressBar;
 
     private AsyncTask<String, Integer, UserResponse> asyncTask;
-    private App.LoginManager loginManager;
-    private TodoApi todoApi;
+    @Inject
+    LoginManager loginManager;
+    @Inject
+    TodoApi todoApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         ButterKnife.inject(this);
-        App application = (App) getApplication();
-        loginManager = application.getLoginManager();
-        todoApi = application.getTodoApi();
+        App.getTodoComponent().inject(this);
 
 
     }

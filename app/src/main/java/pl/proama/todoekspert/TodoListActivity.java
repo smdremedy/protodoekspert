@@ -2,21 +2,18 @@ package pl.proama.todoekspert;
 
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import java.util.List;
 
-import retrofit.RestAdapter;
+import javax.inject.Inject;
+
 import retrofit.RetrofitError;
 import timber.log.Timber;
 
@@ -25,16 +22,18 @@ public class TodoListActivity extends AppCompatActivity {
 
     public static final int REQUEST_CODE = 123;
     private AsyncTask<Void, Void, List<Todo>> asyncTask;
-    private App.LoginManager loginManager;
-    private TodoApi todoApi;
+
+    @Inject
+    LoginManager loginManager;
+    @Inject
+    TodoApi todoApi;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        App application = (App) getApplication();
-        loginManager = application.getLoginManager();
-        todoApi = application.getTodoApi();
+        App.getTodoComponent().inject(this);
+
 
         if(loginManager.needsLogin()) {
             Intent intent = new Intent(getApplicationContext(), LoginActivity.class);

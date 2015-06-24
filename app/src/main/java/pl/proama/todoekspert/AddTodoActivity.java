@@ -13,6 +13,8 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import javax.inject.Inject;
+
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
@@ -29,11 +31,17 @@ public class AddTodoActivity extends ActionBarActivity {
     @InjectView(R.id.doneCheckBox)
     CheckBox doneCheckBox;
 
+    @Inject
+    LoginManager loginManager;
+    @Inject
+    TodoApi todoApi;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_todo);
         ButterKnife.inject(this);
+        App.getTodoComponent().inject(this);
 
     }
 
