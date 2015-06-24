@@ -1,10 +1,13 @@
 package pl.proama.todoekspert;
 
+import android.app.LoaderManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.Loader;
 import android.database.ContentObserver;
 import android.database.Cursor;
 import android.net.Uri;
@@ -37,7 +40,7 @@ import retrofit.RetrofitError;
 import timber.log.Timber;
 
 
-public class TodoListActivity extends AppCompatActivity {
+public class TodoListActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     public static final int REQUEST_CODE = 123;
     private AsyncTask<Void, Void, List<Todo>> asyncTask;
@@ -90,15 +93,15 @@ public class TodoListActivity extends AppCompatActivity {
 
         adapter = new TodoAdapter(LayoutInflater.from(getApplicationContext()));
 
-        
+        getLoaderManager().initLoader(1, null, this);
 
 
-        cursorAdapter = new SimpleCursorAdapter(getApplicationContext(), R.layout.list_item, query, from, to, 0);
+        cursorAdapter = new SimpleCursorAdapter(getApplicationContext(), R.layout.list_item, null, from, to, 0);
         cursorAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
             @Override
             public boolean setViewValue(View view, Cursor cursor, int index) {
 
-                if(index == cursor.getColumnIndex(TodoDao.C_DONE)) {
+                if (index == cursor.getColumnIndex(TodoDao.C_DONE)) {
 
                     CheckBox checkBox = (CheckBox) view;
                     checkBox.setChecked(cursor.getInt(index) > 0);
@@ -124,6 +127,25 @@ public class TodoListActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         registerReceiver(receiver, new IntentFilter(RefreshIntentService.ACTION));
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        return new CursorLoader(getApplicationContext(), TodoProvider.CONTENT_URI, null, null, null, null);
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+
+        Timber.d("load finished:" + cursor);
+
+        cursorAdapter.swapCursor(cursor);
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
+        cursorAdapter.swapCursor(null);
     }
 
     static class TodoAdapter extends BaseAdapter {

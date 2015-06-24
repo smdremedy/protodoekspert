@@ -4,6 +4,7 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
@@ -16,6 +17,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import pl.proama.todoekspert.db.TodoDao;
+import pl.proama.todoekspert.db.TodoProvider;
 import retrofit.RetrofitError;
 import timber.log.Timber;
 
@@ -70,7 +72,15 @@ public class RefreshIntentService extends IntentService {
             List<Todo> todos = todoApi.getTodos(loginManager.getToken()).results;
             for (Todo todo : todos) {
                 Timber.d(todo.toString());
-                todoDao.insertOrUpdate(todo);
+                ContentValues values = new ContentValues();
+                values.put(TodoDao.C_ID, todo.getObjectId());
+                values.put(TodoDao.C_CONTENT, todo.getContent());
+                values.put(TodoDao.C_DONE, todo.isDone());
+                values.put(TodoDao.C_CREATED_AT, todo.getCreatedAt().getTime());
+                values.put(TodoDao.C_UPDATED_AT, todo.getUpdatedAt().getTime());
+                values.put(TodoDao.C_USER_ID, todo.getUser().getObjectId());
+                getContentResolver().insert(TodoProvider.CONTENT_URI, values);
+                //todoDao.insertOrUpdate(todo);
             }
             sendTimelineNotification(todos.size());
 
